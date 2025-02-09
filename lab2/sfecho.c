@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
+#include <getopt.h>
 
 int rotate(int *ch, unsigned int places) {
   int rawChange = *ch + places;
@@ -25,19 +27,39 @@ int rotate(int *ch, unsigned int places) {
 int main(int argc, char *argv[]) {
   bool newline = true;
   bool cypher = false;
+  bool help = false;
   int places;
+  int opt;
+  
+  while((opt = getopt(argc, argv, "n:r:h")) != -1) {
+    switch (opt)
+    {
+      case 'n':
+      newline = false;
+      break;
+      case 'r':
+      places = atoi(optarg);
+      cypher = true;
+      break;
+      case 'h':
+      help = true;
+      printf("sfecho\n\nechos a statement you make after the command.\n\n-n no newline\n-r cypher the message!\n-h help\n");
+      break;
+      
+      default:
+      break;
+    }
+  }
 
+  if(help) {
+    return 0;
+  }
+  
   for (int i = 1; i < argc; i++) {
-    // If an option is called
-    if (argv[i][0] == '-') {
-      if (argv[i][1] == 'n') {
-        newline = false;
-      } else if (argv[i][1] == 'r') {
-        cypher = true;
-        places = atoi(argv[i + 1]);
+    if(argv[i][0] == '-') {
+      if(argv[i][1] == 'r') {
         i++;
       }
-      // Otherwise print with or without cypher
     } else {
       if (cypher) {
         size_t size = strlen(argv[i]);
@@ -53,6 +75,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+    
 
   if (newline) {
     printf("\n");
