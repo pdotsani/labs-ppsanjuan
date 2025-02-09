@@ -5,10 +5,13 @@
 
 int rotate(int *ch, unsigned int places) {
   int rawChange = *ch + places;
+  // If character not in range, return -1
   if (*ch > 126 || *ch < 33) {
     return -1;
   }
 
+  // If character after + places goes over range, 
+  // recycle back to beginning of range
   if (rawChange > 126 && *ch <= 126 && *ch > 32) {
     *ch = rawChange - 126 - 126*(places / 126) + 32;
   } else {
@@ -25,6 +28,7 @@ int main(int argc, char *argv[]) {
   int places;
 
   for (int i = 1; i < argc; i++) {
+    // If an option is called
     if (argv[i][0] == '-') {
       if (argv[i][1] == 'n') {
         newline = false;
@@ -32,7 +36,8 @@ int main(int argc, char *argv[]) {
         cypher = true;
         places = atoi(argv[i + 1]);
         i++;
-      } 
+      }
+      // Otherwise print with or without cypher
     } else {
       if (cypher) {
         size_t size = strlen(argv[i]);
