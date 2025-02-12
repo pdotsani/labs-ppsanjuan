@@ -19,8 +19,6 @@ int rotate(int *ch, unsigned int places) {
   } else {
     *ch = rawChange;
   }
-
-  printf("%c", (char)*ch);
   return 0;
 } 
 
@@ -31,7 +29,7 @@ int main(int argc, char *argv[]) {
   int places;
   int opt;
   
-  while((opt = getopt(argc, argv, "n:r:h")) != -1) {
+  while((opt = getopt(argc, argv, "nr:h")) != -1) {
     switch (opt)
     {
       case 'n':
@@ -55,24 +53,19 @@ int main(int argc, char *argv[]) {
     return 0;
   }
   
-  for (int i = 1; i < argc; i++) {
-    if(argv[i][0] == '-') {
-      if(argv[i][1] == 'r') {
-        i++;
+  for (int i = optind; i < argc; i++) {
+    if (cypher) {
+      size_t size = strlen(argv[i]);
+
+      for (int j = 0; j < size; j++) {
+        int c = *(argv[i] + j);
+        int *ptr = &c;
+        rotate(ptr, places);
+        printf("%c", (char)c);
       }
+      printf(" ");
     } else {
-      if (cypher) {
-        size_t size = strlen(argv[i]);
-  
-        for (int j = 0; j < size; j++) {
-          int c = *(argv[i] + j);
-          int *ptr = &c;
-          rotate(ptr, places);
-        }
-        printf(" ");
-      } else {
-        printf("%s ", argv[i]);
-      }
+      printf("%s ", argv[i]);
     }
   }
     
