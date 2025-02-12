@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
   
         for (int j = 0; j < size; j++) {
           int c = *(argv[i] + j);
-          int* ptr = &c;
+          int *ptr = &c;
           rotate(ptr, places);
         }
         printf(" ");
