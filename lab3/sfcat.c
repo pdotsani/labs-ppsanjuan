@@ -8,12 +8,16 @@ int main(int argc, char *argv[]) {
   int opt;
   bool help = false;
   bool numbering = false;
+  bool meowed = false;
 
-  while((opt = getopt(argc, argv, "nh")) != -1) {
+  while((opt = getopt(argc, argv, "mnh")) != -1) {
     switch (opt)
     {
       case 'n':
       numbering = true;
+      break;
+      case 'm':
+      meowed = true;
       break;
       case 'h':
       help = true;
@@ -45,14 +49,25 @@ int main(int argc, char *argv[]) {
     }
 
     char buf[1024];
-    int line = 1;
+    char line[1024];
+    char meow[] = " meow!";
+    int lineNo = 1;
 
-    while (fgets(buf, sizeof(buf), file) != NULL) {
+    while (fgets(buf, sizeof(buf), file) != NULL) {      
+      strcpy(line, buf);
+      
+      if (meowed) {
+        // remove newline from buffered string
+        line[strlen(line)-1] = '\0';
+        strcat(line, meow);
+        strcat(line, "\n");
+      }
+
       if (numbering) {
-        printf("%5d\t%s", line, buf);
-        line++;
+        printf("%5d\t%s", lineNo, line);
+        lineNo++;
       } else {
-        printf("%s", buf);
+        printf("%s", line);
       }
     }
     fclose(file);
