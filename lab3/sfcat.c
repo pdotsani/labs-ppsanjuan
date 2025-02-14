@@ -7,12 +7,13 @@
 int main(int argc, char *argv[]) {
   int opt;
   bool help = false;
+  bool numbering = false;
 
   while((opt = getopt(argc, argv, "nh")) != -1) {
     switch (opt)
     {
       case 'n':
-      printf("lines!");
+      numbering = true;
       break;
       case 'h':
       help = true;
@@ -37,15 +38,25 @@ int main(int argc, char *argv[]) {
   
   for (int i = optind; i < argc; i++) {
     FILE* file = fopen(argv[i], "r");
+    
     if (file == NULL) {
       printf("Error opening file\n");
       return 1;
     }
+
     char buf[1024];
+    int line = 1;
+
     while (fgets(buf, sizeof(buf), file) != NULL) {
-      printf("%s", buf);
+      if (numbering) {
+        printf("%5d\t%s", line, buf);
+        line++;
+      } else {
+        printf("%s", buf);
+      }
     }
     fclose(file);
   }
+
   return 0;
 }
