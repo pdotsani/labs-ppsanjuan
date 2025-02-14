@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
       break;
       case 'h':
       help = true;
-      printf("sfcat\n\nprints the output of the file(s) or stdin.\n\n-n line numbering\n-h help\n");
+      printf("sfcat\n\nprints the output of the file(s) or stdin.\n\n-n line numbering\n-m add a meow to every line!\n-h help\n");
       break;
       
       default:
