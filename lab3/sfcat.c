@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     FILE* file = fopen(argv[i], "r");
     
     if (file == NULL) {
-      printf("Error opening file\n");
+      perror("fopen");
       return 1;
     }
 
