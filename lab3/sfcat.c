@@ -4,6 +4,14 @@
 #include <stdbool.h>
 #include <string.h>
 
+void readFromStdin() {
+  char str[1024];
+
+  while(fgets(str, sizeof(str), stdin) != NULL) {
+    printf("%s", str);
+  }
+}
+ 
 int main(int argc, char *argv[]) {
   int opt;
   bool help = false;
@@ -34,43 +42,45 @@ int main(int argc, char *argv[]) {
   }
 
   if (optind == argc) {
-    char str[100];
-    scanf("%s", str);
-    printf("%s\n", str);
-    return 0;
+    readFromStdin();
   }
   
   for (int i = optind; i < argc; i++) {
-    FILE* file = fopen(argv[i], "r");
+    if (strcmp(argv[i], "-") == 0) {
+      readFromStdin();
+    } else {
+      FILE* file = fopen(argv[i], "r");
     
-    if (file == NULL) {
-      perror("fopen");
-      return 1;
-    }
-
-    char buf[1024];
-    char line[1024];
-    char meow[] = " meow!";
-    int lineNo = 1;
-
-    while (fgets(buf, sizeof(buf), file) != NULL) {      
-      strcpy(line, buf);
-      
-      if (meowed) {
-        // remove newline from buffered string
-        line[strlen(line)-1] = '\0';
-        strcat(line, meow);
-        strcat(line, "\n");
+      if (file == NULL) {
+        perror("fopen");
+        return 1;
       }
 
-      if (numbering) {
-        printf("%5d\t%s", lineNo, line);
-        lineNo++;
-      } else {
-        printf("%s", line);
+      char buf[1024];
+      char line[1024];
+      char meow[] = " meow!";
+      int lineNo = 1;
+
+      while (fgets(buf, sizeof(buf), file) != NULL) {      
+        strcpy(line, buf);
+        
+        if (meowed) {
+          // remove newline from buffered string
+          line[strlen(line)-1] = '\0';
+          strcat(line, meow);
+          strcat(line, "\n");
+        }
+
+        if (numbering) {
+          printf("%5d\t%s", lineNo, line);
+          lineNo++;
+        } else {
+          printf("%s", line);
+        }
       }
+      fclose(file);
+      printf("\n");
     }
-    fclose(file);
   }
 
   return 0;
