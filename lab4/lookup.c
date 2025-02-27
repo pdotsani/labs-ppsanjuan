@@ -6,18 +6,18 @@
 #include <stdbool.h>
 
 struct keyword {
-  // keyword vars
+  // keyword tracking
   char *keyword;
   int keywordIdx;
   int keywordLength;
   bool foundKeyword;
-  // dlim vars
+  // dlim tracking
   char *dlim;
   int dlimIdx;
   int dlimLength;
   bool foundDlim;
   bool inDlim;
-  // capturing value
+  // capturing value tracking
   char *captured;
   bool startCapture;
   int idx;
@@ -52,7 +52,7 @@ void lookup_dlim(struct keyword *key, char *c) {
   }
 };
 
-bool find_keyword(struct keyword *key, char *c) {
+bool found_keyword(struct keyword *key, char *c) {
   if (key->foundDlim == true && key->foundKeyword == true && key->startCapture == false) {
     if (*c != ' ' && *(key->dlim + key->dlimLength - 1) != *c) {
       key->startCapture = true;
@@ -71,7 +71,7 @@ bool find_keyword(struct keyword *key, char *c) {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
     lookup_key(&key, &c);
     lookup_dlim(&key, &c);
 
-    if (find_keyword(&key, &c)) {
+    if (found_keyword(&key, &c)) {
       return 0;
     }
  
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
       free(line);
       lineIdx = 0;
       line = NULL;
-      line = malloc(100);
+      line = malloc(1000);
     }
   }
 
