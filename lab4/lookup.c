@@ -6,18 +6,74 @@
 #include <stdbool.h>
 
 struct keyword {
+  // keyword vars
   char *keyword;
-  char *dlim;
   int keywordIdx;
-  int dlimIdx;
   int keywordLength;
-  int dlimLength;
   bool foundKeyword;
+  // dlim vars
+  char *dlim;
+  int dlimIdx;
+  int dlimLength;
   bool foundDlim;
+  bool inDlim;
+  // capturing value
   char *captured;
   bool startCapture;
   int idx;
 };
+
+void lookup_key(struct keyword *key, char *c) {
+  if (*(key->keyword + key->keywordIdx) == *c && key->foundKeyword == false) {
+    key->keywordIdx++;
+    if (key->keywordIdx == key->keywordLength) {
+      key->keywordIdx = 0;
+      key->foundKeyword = true;
+    }
+  } else {
+    key->keywordIdx = 0;
+  }
+}
+
+void lookup_dlim(struct keyword *key, char *c) {
+  if (key->foundKeyword == true && key->foundDlim == false) {
+    if(*(key->dlim + key->dlimIdx) == *c) {
+      key->inDlim = true;
+      key->dlimIdx++;
+      if(key->dlimIdx == key->dlimLength) {
+        key->dlimIdx = 0;
+        key->foundDlim = true;
+        key->inDlim = false;
+      }
+    } else {
+      key->dlimIdx = 0;
+      key->inDlim = false;
+    }
+  }
+};
+
+bool find_keyword(struct keyword *key, char *c) {
+  if (key->foundDlim == true && key->foundKeyword == true && key->startCapture == false) {
+    if (*c != ' ' && *(key->dlim + key->dlimLength - 1) != *c) {
+      key->startCapture = true;
+    }
+  }
+
+  if (key->foundDlim == true && key->foundKeyword == true && key->startCapture == true) {
+    if (*c != '\n') {
+      *(key->captured + key->idx) = *c;
+      key->idx++;
+    } else {
+      key->startCapture = false;
+      key->foundDlim = false;
+      key->foundKeyword = false;
+      printf("%s\n", key->captured);
+      return true;
+    }
+  }
+  
+  return false;
+}
 
 int main(int argc, char *argv[]) {
   struct keyword key;
@@ -29,6 +85,7 @@ int main(int argc, char *argv[]) {
   key.dlimLength = strlen(argv[2]);
   key.foundKeyword = false;
   key.foundDlim = false;
+  key.inDlim = false;
   key.idx = 0;
   key.captured = (char *)malloc(1025);
   key.startCapture = false;
@@ -40,43 +97,30 @@ int main(int argc, char *argv[]) {
   }
 
   char c;
+  char *line = malloc(1000);
+  int lineIdx = 0;
   ssize_t read_sz;
   while((read_sz = read(fd, &c, 1)) > 0) {
-    if (*(key.keyword + key.keywordIdx) == c && key.foundKeyword == false) {
-      key.keywordIdx++;
-      if (key.keywordIdx == key.keywordLength) {
-        key.keywordIdx = 0;
-        key.foundKeyword = true;
-      }
-    } else {
-      key.keywordIdx = 0;
-    }
+    *(line + lineIdx) = c;
+    lineIdx++;
+    
+    lookup_key(&key, &c);
+    lookup_dlim(&key, &c);
 
-    if (key.foundKeyword == true && key.foundDlim == false) {
-      if(*(key.dlim + key.dlimIdx) == c) {
-        key.dlimIdx++;
-        if(key.dlimIdx == key.dlimLength) {
-          key.dlimIdx = 0;
-          key.foundDlim = true;
-        }
-      }
+    if (find_keyword(&key, &c)) {
+      return 0;
     }
-
-    if (key.foundDlim == true && key.foundKeyword == true && key.startCapture == false) {
-      if (c != ' ' && *(key.dlim + key.dlimLength - 1) != c) {
-        key.startCapture = true;
-      }
+ 
+    if (key.foundDlim == false && key.foundKeyword == true && c == '\n') {
+      printf("%s", line);
+      return 0;
     }
-
-    if (key.foundDlim == true && key.foundKeyword == true && key.startCapture == true) {
-      if (c != ' ') {
-        *(key.captured + key.idx) = c;
-        key.idx++;
-      } else {
-        key.startCapture = false;
-        printf("%s\n", key.captured);
-        return 0;
-      }
+    
+    if (c == '\n') {
+      free(line);
+      lineIdx = 0;
+      line = NULL;
+      line = malloc(100);
     }
   }
 
