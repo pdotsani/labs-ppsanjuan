@@ -1,4 +1,4 @@
-about: lookup.c
+lookup: lookup.c
 	$(CC) -Wall $^ -o $@
 
 install: lookup

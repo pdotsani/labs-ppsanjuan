@@ -4,24 +4,9 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdbool.h>
+#include <string.h>
 
-struct keyword {
-  // keyword tracking
-  char *keyword;
-  int keywordIdx;
-  int keywordLength;
-  bool foundKeyword;
-  // dlim tracking
-  char *dlim;
-  int dlimIdx;
-  int dlimLength;
-  bool foundDlim;
-  bool inDlim;
-  // capturing value tracking
-  char *captured;
-  bool startCapture;
-  int idx;
-};
+#include "lookup.h"
 
 void lookup_key(struct keyword *key, char *c) {
   if (*(key->keyword + key->keywordIdx) == *c && key->foundKeyword == false) {
@@ -52,7 +37,7 @@ void lookup_dlim(struct keyword *key, char *c) {
   }
 };
 
-bool found_keyword(struct keyword *key, char *c) {
+bool found_keyword(struct keyword *key, char *c, char *buf) {
   if (key->foundDlim == true && key->foundKeyword == true && key->startCapture == false) {
     if (*c != ' ' && *(key->dlim + key->dlimLength - 1) != *c) {
       key->startCapture = true;
@@ -67,7 +52,8 @@ bool found_keyword(struct keyword *key, char *c) {
       key->startCapture = false;
       key->foundDlim = false;
       key->foundKeyword = false;
-      printf("%s\n", key->captured);
+      *(key->captured + key->idx) = '\n';
+      strcpy(buf, key->captured);
       return true;
     }
   }
@@ -75,7 +61,7 @@ bool found_keyword(struct keyword *key, char *c) {
   return false;
 }
 
-int lookup(struct keyword *key, int *fd) {
+int lookup(struct keyword *key, int *fd, char *buf) {
   char c;
   char *line = malloc(1000);
   int lineIdx = 0;
@@ -87,12 +73,12 @@ int lookup(struct keyword *key, int *fd) {
     lookup_key(key, &c);
     lookup_dlim(key, &c);
 
-    if (found_keyword(key, &c)) {
+    if (found_keyword(key, &c, buf)) {
       return 0;
     }
 
     if (key->foundDlim == false && key->foundKeyword == true && c == '\n') {
-      printf("%s", line);
+      strcpy(buf, line);
       return 0;
     }
     
@@ -133,7 +119,15 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  lookup(&key, &fd);
+  char *buf = malloc(1000);
+
+  lookup(&key, &fd, buf);
+
+  if (buf[0] != '\0') {
+    printf("%s", buf);
+  }
+
+  free(*buf);
 
   return 0;
 }

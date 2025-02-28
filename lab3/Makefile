@@ -1,4 +1,4 @@
-about: sfcat.c
+sfcat: sfcat.c
 	$(CC) -Wall $^ -o $@
 
 install: about
