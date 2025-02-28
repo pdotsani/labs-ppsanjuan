@@ -13,8 +13,6 @@ struct globals {
     int lineNo;
 };
 
-int sizeof_globals = 3 * sizeof(bool) + 1024 + 2 * sizeof(int);
-
 void readFromStdin(struct globals *g) {
   while(fgets(g->str, sizeof(g->str), stdin) != NULL) {
     if (g->numbering == true) {
@@ -27,7 +25,7 @@ void readFromStdin(struct globals *g) {
 }
  
 int main(int argc, char *argv[]) {
-  struct globals *g = malloc(sizeof_globals);
+  struct globals *g = malloc(sizeof(struct globals));
   g->help = false;
   g->numbering = false;
   g->meowed = false;
