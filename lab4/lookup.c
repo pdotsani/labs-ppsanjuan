@@ -75,6 +75,43 @@ bool found_keyword(struct keyword *key, char *c) {
   return false;
 }
 
+int lookup(struct keyword *key, int *fd) {
+  char c;
+  char *line = malloc(1000);
+  int lineIdx = 0;
+  ssize_t read_sz;
+  while((read_sz = read(*fd, &c, 1)) > 0) {
+    *(line + lineIdx) = c;
+    lineIdx++;
+      
+    lookup_key(key, &c);
+    lookup_dlim(key, &c);
+
+    if (found_keyword(key, &c)) {
+      return 0;
+    }
+
+    if (key->foundDlim == false && key->foundKeyword == true && c == '\n') {
+      printf("%s", line);
+      return 0;
+    }
+    
+    if (c == '\n') {
+      free(line);
+      lineIdx = 0;
+      line = NULL;
+      line = malloc(1000);
+    }
+  }
+
+  if (read_sz == -1) {
+    perror("read");
+    return 1;
+  }
+
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
   struct keyword key;
   key.keyword = argv[1];
@@ -96,38 +133,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  char c;
-  char *line = malloc(1000);
-  int lineIdx = 0;
-  ssize_t read_sz;
-  while((read_sz = read(fd, &c, 1)) > 0) {
-    *(line + lineIdx) = c;
-    lineIdx++;
-    
-    lookup_key(&key, &c);
-    lookup_dlim(&key, &c);
-
-    if (found_keyword(&key, &c)) {
-      return 0;
-    }
- 
-    if (key.foundDlim == false && key.foundKeyword == true && c == '\n') {
-      printf("%s", line);
-      return 0;
-    }
-    
-    if (c == '\n') {
-      free(line);
-      lineIdx = 0;
-      line = NULL;
-      line = malloc(1000);
-    }
-  }
-
-  if (read_sz == -1) {
-    perror("read");
-    return 1;
-  }
+  lookup(&key, &fd);
 
   return 0;
 }
