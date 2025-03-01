@@ -8,6 +8,21 @@
 
 #include "lookup.h"
 
+void configure_keyword(struct keyword *key, char *argv[]) {
+  key->keyword = argv[1];
+  key->dlim = argv[2];
+  key->keywordIdx = 0; 
+  key->dlimIdx = 0; 
+  key->keywordLength = strlen(argv[1]);
+  key->dlimLength = strlen(argv[2]);
+  key->foundKeyword = false;
+  key->foundDlim = false;
+  key->inDlim = false;
+  key->idx = 0;
+  key->captured = malloc(1025);
+  key->startCapture = false;
+}
+
 void lookup_key(struct keyword *key, char *c) {
   if (*(key->keyword + key->keywordIdx) == *c && key->foundKeyword == false) {
     key->keywordIdx++;
@@ -85,8 +100,7 @@ int lookup(struct keyword *key, int *fd, char *buf) {
     if (c == '\n') {
       free(line);
       lineIdx = 0;
-      line = NULL;
-      line = malloc(1000);
+      line = calloc(1000, sizeof(char));
     }
   }
 
@@ -100,18 +114,7 @@ int lookup(struct keyword *key, int *fd, char *buf) {
 
 int main(int argc, char *argv[]) {
   struct keyword key;
-  key.keyword = argv[1];
-  key.dlim = argv[2];
-  key.keywordIdx = 0; 
-  key.dlimIdx = 0; 
-  key.keywordLength = strlen(argv[1]);
-  key.dlimLength = strlen(argv[2]);
-  key.foundKeyword = false;
-  key.foundDlim = false;
-  key.inDlim = false;
-  key.idx = 0;
-  key.captured = (char *)malloc(1025);
-  key.startCapture = false;
+  configure_keyword(&key, argv);
   
   int fd = open(argv[3], O_RDONLY);
   if (fd == -1) {
@@ -127,7 +130,7 @@ int main(int argc, char *argv[]) {
     printf("%s", buf);
   }
 
-  free(*buf);
+  free(buf);
 
   return 0;
 }

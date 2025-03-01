@@ -24,6 +24,8 @@ struct keyword {
   int idx;
 };
 
+void configure_keyword(struct keyword *key, char *argv[]);
+
 void lookup_key(struct keyword *key, char *c);
 
 void lookup_dlim(struct keyword *key, char *c);
