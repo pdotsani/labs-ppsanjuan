@@ -10,14 +10,13 @@ struct globals {
     bool meowed;
     char str[1024];
     int opt;
-    int lineNo;
 };
 
-void readFromStdin(struct globals *g) {
+void readFromStdin(struct globals *g, int *lineNo) {
   while(fgets(g->str, sizeof(g->str), stdin) != NULL) {
     if (g->numbering == true) {
-      printf("%5d\t%s", g->lineNo, g->str);
-      g->lineNo++;
+      printf("%5d\t%s", *lineNo, g->str);
+      *lineNo = *lineNo + 1;
     } else {
       printf("%s", g->str);
     }
@@ -25,23 +24,26 @@ void readFromStdin(struct globals *g) {
 }
  
 int main(int argc, char *argv[]) {
-  struct globals *g = malloc(sizeof(struct globals));
-  g->help = false;
-  g->numbering = false;
-  g->meowed = false;
-  g->lineNo = 1;
+  struct globals g;
+  g.help = false;
+  g.numbering = false;
+  g.meowed = false;
+  
+  int *lineNo;
+  lineNo = malloc(100);
+  *lineNo = 1;
 
-  while((g->opt = getopt(argc, argv, "mnh")) != -1) {
-    switch (g->opt)
+  while((g.opt = getopt(argc, argv, "mnh")) != -1) {
+    switch (g.opt)
     {
       case 'n':
-      g->numbering = true;
+      g.numbering = true;
       break;
       case 'm':
-      g->meowed = true;
+      g.meowed = true;
       break;
       case 'h':
-      g->help = true;
+      g.help = true;
       printf("sfcat\n\nprints the output of the file(s) or stdin.\n\n-n line numbering\n-m add a meow to every line!\n-h help\n");
       break;
       
@@ -50,17 +52,17 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if(g->help) {
+  if(g.help) {
     return 0;
   }
 
   if (optind == argc) {
-    readFromStdin(g);
+    readFromStdin(&g, lineNo);
   }
   
   for (int i = optind; i < argc; i++) {
     if (strcmp(argv[i], "-") == 0) {
-      readFromStdin(g);
+      readFromStdin(&g, lineNo);
     } else {
       FILE* file = fopen(argv[i], "r");
     
@@ -76,16 +78,16 @@ int main(int argc, char *argv[]) {
       while (fgets(buf, sizeof(buf), file) != NULL) {      
         strcpy(line, buf);
         
-        if (g->meowed) {
+        if (g.meowed) {
           // remove newline from buffered string
           line[strlen(line)-1] = '\0';
           strcat(line, meow);
           strcat(line, "\n");
         }
 
-        if (g->numbering) {
-          printf("%5d\t%s", g->lineNo, line);
-          g->lineNo++;
+        if (g.numbering) {
+          printf("%5d\t%s", *lineNo, line);
+          *lineNo = *lineNo + 1;
         } else {
           printf("%s", line);
         }
@@ -94,6 +96,6 @@ int main(int argc, char *argv[]) {
       printf("\n");
     }
   }
-  free(g);
+  free(lineNo);
   return 0;
 }
