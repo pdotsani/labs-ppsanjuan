@@ -30,7 +30,7 @@ void lookup_key(struct keyword *key, char *c);
 
 void lookup_dlim(struct keyword *key, char *c);
 
-bool found_keyword(struct keyword *key, char *c, char *buf);
+bool found_value(struct keyword *key, char *c, char *buf);
 
 // The main function you would use to lookup a keyword and it's values
 // pass in they keyword struct detailed in this header, along with the file and

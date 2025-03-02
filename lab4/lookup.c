@@ -52,7 +52,7 @@ void lookup_dlim(struct keyword *key, char *c) {
   }
 };
 
-bool found_keyword(struct keyword *key, char *c, char *buf) {
+bool found_value(struct keyword *key, char *c, char *buf) {
   if (key->foundDlim == true && key->foundKeyword == true && key->startCapture == false) {
     if (*c != ' ' && *(key->dlim + key->dlimLength - 1) != *c) {
       key->startCapture = true;
@@ -88,15 +88,19 @@ int lookup(struct keyword *key, int *fd, char *buf) {
     lookup_key(key, &c);
     lookup_dlim(key, &c);
 
-    if (found_keyword(key, &c, buf)) {
+    // If we found the keyword and the delimeter, we print out the desired value only.
+    if (found_value(key, &c, buf)) {
       return 0;
     }
 
+    // If we found the keyword, but not the delimeter before we reached the end of the line,
+    // we print out the line.
     if (key->foundDlim == false && key->foundKeyword == true && c == '\n') {
       strcpy(buf, line);
       return 0;
     }
     
+    // Resets the line string every time we hit a newline
     if (c == '\n') {
       free(line);
       lineIdx = 0;
